@@ -164,9 +164,5 @@ public class Dijkstra {
 			puntoIntermedio = puntiPrecedenti.get(listaPunti.indexOf(puntoIntermedio));
 			System.out.println("(" + puntoIntermedio.getX() + ", " + puntoIntermedio.getY() + ")");
 		}
-
-
-
 	}
-
 }
