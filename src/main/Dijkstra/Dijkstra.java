@@ -27,7 +27,7 @@ public class Dijkstra {
 		listaPunti.add(puntoE);
 		listaPunti.add(puntoF);
 
-		//Creazione delle mappe che permettono di sapere quali unti sono adiacenti
+		//Creazione delle mappe che permettono di sapere quali punti sono adiacenti
 		Map<Punto, Map<Punto,Double>> mappaPuntiDistanze = new HashMap<Punto, Map<Punto,Double>>();
 
 		Map<Punto,Double> mappaA = new HashMap<Punto, Double>();
@@ -87,7 +87,7 @@ public class Dijkstra {
 		//del cammino (minimo) per arrivare al punto x dalla sorgente
 		List<Double> pesiTotali = new ArrayList<Double>(numeroPunti);
 
-		//Si inizializza ad ifinito per tutti i punti, tranne 0 per la sorgente
+		//Si inizializza ad infinito per tutti i punti, tranne 0 per la sorgente
 		for(int i=0; i<numeroPunti;i++) {
 			pesiTotali.add(inf);
 		}
@@ -129,14 +129,11 @@ public class Dijkstra {
 			listaPuntiDaScandire.remove(puntoNuovo);
 			listaPuntiConsiderati.add(puntoNuovo);
 
-			//Per ogni punto in listaPuntiDaScandire Adiacente a puntoNuovo
-			//e tale che pesiTotali[punto] > pesiTotali[puntoNuovo] + dist(punto,puntoNuovo)
-
 			//Si calcola la lista dei punti adiacent al punto nuovo
 			List<Punto> listaPuntiAdiacentiAlPuntoNuovo = new ArrayList<Punto>
 			(mappaPuntiDistanze.get(puntoNuovo).keySet());
 
-			//Per ogni punto in listaPuntiDaScandireAdiacenteAPuntoNuovo
+			//Per ogni punto in listaPuntiAdiacentiAPuntoNuovo
 			//e tale che pesiTotali[punto] > pesiTotali[puntoNuovo] + dist(punto,puntoNuovo)
 			for(Punto punto:listaPuntiAdiacentiAlPuntoNuovo) {
 				if(  listaPuntiDaScandire.contains(punto) && pesiTotali.get(listaPunti.indexOf(punto)) > 
