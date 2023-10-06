@@ -21,14 +21,13 @@ public class Dijkstra {
 		Punto puntoF = new Punto(1,4);
 		Punto puntoG = new Punto(5,5);
 
-		listaPunti.add(puntoG);
 		listaPunti.add(puntoA);
 		listaPunti.add(puntoB);
 		listaPunti.add(puntoC);
 		listaPunti.add(puntoD);
 		listaPunti.add(puntoE);
 		listaPunti.add(puntoF);
-
+		listaPunti.add(puntoG);
 
 		//Creazione delle mappe che permettono di sapere quali punti sono adiacenti
 		Map<Punto, Map<Punto,Double>> mappaPuntiDistanze = new HashMap<Punto, Map<Punto,Double>>();
@@ -65,10 +64,9 @@ public class Dijkstra {
 		Map<Punto,Double> mappaG = new HashMap<Punto, Double>();
 		mappaG.put(puntoF, puntoG.distanza(puntoF));
 		mappaPuntiDistanze.put(puntoG, mappaG);
-
+		
 		//costanti utili
 		double inf = Double.POSITIVE_INFINITY;
-		boolean uscireDalCiclo = true;
 		int numeroPunti = listaPunti.size();
 
 		//scegliere vertice sorgente 
@@ -79,6 +77,8 @@ public class Dijkstra {
 		if(!listaPunti.contains(sorgente)) {
 			System.out.println("Il punto scelto come sorgente non fa pare del grafo");
 		}
+		
+		//IMPLEMENTARE LISTE AUSILIARIE
 
 		//Creazione lista dei punti che sono già stati considerati, inizialmente 
 		// si inserisce solo la sorgente
@@ -92,7 +92,7 @@ public class Dijkstra {
 
 		//Creazione della lista che in posizione x contiene il peso totale
 		//del cammino (minimo) per arrivare al punto x dalla sorgente
-		List<Double> pesiTotali = new ArrayList<Double>(numeroPunti);
+		List<Double> pesiTotali = new ArrayList<Double>();
 
 		//Si inizializza ad infinito per tutti i punti, tranne 0 per la sorgente
 		for(int i=0; i<numeroPunti;i++) {
@@ -102,11 +102,10 @@ public class Dijkstra {
 
 		//Creazione della lista che in posizione x contiene il punto che 
 		//precede il punto x nel cammino minimo
-		List<Punto> puntiPrecedenti = new ArrayList<Punto>(numeroPunti);
+		List<Punto> puntiPrecedenti = new ArrayList<Punto>();
 		for(int i=0; i<numeroPunti;i++) {
 			puntiPrecedenti.add(null);
 		}
-		puntiPrecedenti.set(indexSorgente,sorgente);
 
 		//per ogni punto adiacente alla sorgente si pone PuntoPrecedente del punto = sorgente
 		// e pesoTotale del cammino fino al punto = dist(sorgente,punto)
@@ -117,16 +116,12 @@ public class Dijkstra {
 		}); 
 
 
-		//Finche la listaPuntiDaScandire non è vuota
+		//Finchè la listaPuntiDaScandire non è vuota
 		while(!listaPuntiDaScandire.isEmpty()) {
 
-			//Se i restanti punti da Scandire sono tutti isolati, si esce dal cilo
-			for(Punto punto : listaPuntiDaScandire) {
-				if(pesiTotali.get(listaPunti.indexOf(punto)) < inf) {
-					uscireDalCiclo = false;
-				}
-			}
-			if(uscireDalCiclo == true) {
+			//Se i restanti punti da Scandire sono tutti isolati, si esce dal while
+			if(listaPuntiDaScandire.stream().allMatch(punto ->
+				pesiTotali.get(listaPunti.indexOf(punto)).equals(inf))) {
 				break;
 			}
 
@@ -160,7 +155,6 @@ public class Dijkstra {
 
 						//Si pone pesiTotali[punto] = pesiTotali[puntoNuovo] + dist(punto,puntoNuovo)
 						//e puntoPrecedente[punto]=puntoNuovo;
-
 						pesiTotali.set(listaPunti.indexOf(punto), listaPunti.indexOf(puntoNuovo) +
 								punto.distanza(puntoNuovo));
 						puntiPrecedenti.set(listaPunti.indexOf(punto), puntoNuovo);
@@ -173,10 +167,12 @@ public class Dijkstra {
 
 		//Si calcola il cammino minimo rileggendo al contrario la lista puntiPrecedenti
 		try { //Si genera eccezione se il punto preso come destinazione non è connesso alla sorgente
+			
 			Punto puntoDestinazione = puntoG;
 			Punto puntoIntermedio = puntiPrecedenti.get(listaPunti.indexOf(puntoDestinazione));		
 			System.out.println("Il cammino più breve dalla sorgente al punto: (" + puntoDestinazione.getX() + ", " +
-					puntoDestinazione.getY() + ") è:");
+					puntoDestinazione.getY() + ") è lungo: " + pesiTotali.get(listaPunti.indexOf(puntoDestinazione)) +
+					" ed è:");
 			System.out.println("(" + puntoDestinazione.getX() + ", " + puntoDestinazione.getY() + ")");
 			System.out.println("(" + puntoIntermedio.getX() + ", " + puntoIntermedio.getY() + ")");
 
