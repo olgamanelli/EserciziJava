@@ -58,13 +58,11 @@ public class Dijkstra {
 
 		Map<Punto,Double> mappaF = new HashMap<Punto, Double>();
 		mappaF.put(puntoE, puntoF.distanza(puntoE));
-		mappaF.put(puntoG, puntoF.distanza(puntoG));
 		mappaPuntiDistanze.put(puntoF, mappaF);
 
 		Map<Punto,Double> mappaG = new HashMap<Punto, Double>();
-		mappaG.put(puntoF, puntoG.distanza(puntoF));
 		mappaPuntiDistanze.put(puntoG, mappaG);
-		
+
 		//costanti utili
 		double inf = Double.POSITIVE_INFINITY;
 		int numeroPunti = listaPunti.size();
@@ -77,7 +75,7 @@ public class Dijkstra {
 		if(!listaPunti.contains(sorgente)) {
 			System.out.println("Il punto scelto come sorgente non fa pare del grafo");
 		}
-		
+
 		//IMPLEMENTARE LISTE AUSILIARIE
 
 		//Creazione lista dei punti che sono già stati considerati, inizialmente 
@@ -121,7 +119,7 @@ public class Dijkstra {
 
 			//Se i restanti punti da Scandire sono tutti isolati, si esce dal while
 			if(listaPuntiDaScandire.stream().allMatch(punto ->
-				pesiTotali.get(listaPunti.indexOf(punto)).equals(inf))) {
+			pesiTotali.get(listaPunti.indexOf(punto)).equals(inf))) {
 				break;
 			}
 
@@ -155,7 +153,7 @@ public class Dijkstra {
 
 						//Si pone pesiTotali[punto] = pesiTotali[puntoNuovo] + dist(punto,puntoNuovo)
 						//e puntoPrecedente[punto]=puntoNuovo;
-						pesiTotali.set(listaPunti.indexOf(punto), listaPunti.indexOf(puntoNuovo) +
+						pesiTotali.set(listaPunti.indexOf(punto), pesiTotali.get(listaPunti.indexOf(puntoNuovo)) +
 								punto.distanza(puntoNuovo));
 						puntiPrecedenti.set(listaPunti.indexOf(punto), puntoNuovo);
 					}
@@ -165,23 +163,27 @@ public class Dijkstra {
 			}
 		}	
 
-		//Si calcola il cammino minimo rileggendo al contrario la lista puntiPrecedenti
-		try { //Si genera eccezione se il punto preso come destinazione non è connesso alla sorgente
+		listaPunti.stream().forEach(puntoDestinazione->{
+			if(pesiTotali.get(listaPunti.indexOf(puntoDestinazione))==inf) {
+				System.out.println("Il punto (" + puntoDestinazione.getX() + ", " + puntoDestinazione.getY() + ")"
+						+ " non è connesso alla sorgente!!");
+			} else if(puntoDestinazione.equals(sorgente)) {
 			
-			Punto puntoDestinazione = puntoG;
-			Punto puntoIntermedio = puntiPrecedenti.get(listaPunti.indexOf(puntoDestinazione));		
-			System.out.println("Il cammino più breve dalla sorgente al punto: (" + puntoDestinazione.getX() + ", " +
-					puntoDestinazione.getY() + ") è lungo: " + pesiTotali.get(listaPunti.indexOf(puntoDestinazione)) +
-					" ed è:");
-			System.out.println("(" + puntoDestinazione.getX() + ", " + puntoDestinazione.getY() + ")");
-			System.out.println("(" + puntoIntermedio.getX() + ", " + puntoIntermedio.getY() + ")");
+			}else {
 
-			while(! puntoIntermedio.equals(sorgente)) {
-				puntoIntermedio = puntiPrecedenti.get(listaPunti.indexOf(puntoIntermedio));
+				//Si calcola il cammino minimo rileggendo al contrario la lista puntiPrecedenti
+				Punto puntoIntermedio = puntiPrecedenti.get(listaPunti.indexOf(puntoDestinazione));		
+				System.out.println("Il cammino più breve dalla sorgente al punto: (" + puntoDestinazione.getX() + ", " +
+						puntoDestinazione.getY() + ") è lungo: " + pesiTotali.get(listaPunti.indexOf(puntoDestinazione)) +
+						" ed è:");
+				System.out.println("(" + puntoDestinazione.getX() + ", " + puntoDestinazione.getY() + ")");
 				System.out.println("(" + puntoIntermedio.getX() + ", " + puntoIntermedio.getY() + ")");
+
+				while(! puntoIntermedio.equals(sorgente)) {
+					puntoIntermedio = puntiPrecedenti.get(listaPunti.indexOf(puntoIntermedio));
+					System.out.println("(" + puntoIntermedio.getX() + ", " + puntoIntermedio.getY() + ")");
+				}
 			}
-		} catch(NullPointerException e){
-			System.out.println("Il punto scelto come destinazione non è connesso alla sorgente!!");
-		}
+		});
 	}
 }
