@@ -81,7 +81,6 @@ public class Dijkstra {
 		//Creazione lista dei punti che sono già stati considerati, inizialmente 
 		// si inserisce solo la sorgente
 		List<Punto> listaPuntiConsiderati = new ArrayList<Punto>();
-		listaPuntiConsiderati.add(sorgente);
 
 		//Creazione lista dei punti che non sono ancora stati considerati, inizialmente 
 		//contiene tutti i punti tranne la sorgente
@@ -92,18 +91,42 @@ public class Dijkstra {
 		//del cammino (minimo) per arrivare al punto x dalla sorgente
 		List<Double> pesiTotali = new ArrayList<Double>();
 
+		//Creazione della lista che in posizione x contiene il punto che 
+		//precede il punto x nel cammino minimo
+		List<Punto> puntiPrecedenti = new ArrayList<Punto>();
+
+
+		//Inizializzazione delle liste
+		InizializzaListe(numeroPunti, indexSorgente, sorgente, pesiTotali, puntiPrecedenti,
+				listaPunti, listaPuntiConsiderati, mappaPuntiDistanze);
+
+		//Aggiornamento delle liste
+		AggiornaListe(pesiTotali, listaPuntiDaScandire, listaPuntiConsiderati,puntiPrecedenti,
+				listaPunti, mappaPuntiDistanze);
+
+		//Stampa dei cammini minimi dalla sorgente a ogni altro punto
+		StampaCamminiMinimi(listaPunti, pesiTotali, puntiPrecedenti, sorgente);
+
+
+	}
+
+	public static void InizializzaListe(int numeroPunti, int indexSorgente, Punto sorgente, List<Double> pesiTotali, List<Punto> puntiPrecedenti,
+			List<Punto> listaPunti, List<Punto> listaPuntiConsiderati, Map<Punto, Map<Punto,Double>> mappaPuntiDistanze) {
 		//Si inizializza ad infinito per tutti i punti, tranne 0 per la sorgente
+
+		double inf = Double.POSITIVE_INFINITY;
+
 		for(int i=0; i<numeroPunti;i++) {
 			pesiTotali.add(inf);
 		}
 		pesiTotali.set(indexSorgente,0.0);
 
-		//Creazione della lista che in posizione x contiene il punto che 
-		//precede il punto x nel cammino minimo
-		List<Punto> puntiPrecedenti = new ArrayList<Punto>();
+
 		for(int i=0; i<numeroPunti;i++) {
 			puntiPrecedenti.add(null);
 		}
+
+		listaPuntiConsiderati.add(sorgente);
 
 		//per ogni punto adiacente alla sorgente si pone PuntoPrecedente del punto = sorgente
 		// e pesoTotale del cammino fino al punto = dist(sorgente,punto)
@@ -112,7 +135,13 @@ public class Dijkstra {
 			pesiTotali.set(listaPunti.indexOf(punto), sorgente.distanza(punto));
 			puntiPrecedenti.set(listaPunti.indexOf(punto),sorgente);
 		}); 
+	}
 
+	public static void AggiornaListe(List<Double> pesiTotali, List<Punto> listaPuntiDaScandire, 
+			List<Punto> listaPuntiConsiderati, List<Punto> puntiPrecedenti, List<Punto> listaPunti,
+			Map<Punto,Map<Punto, Double>> mappaPuntiDistanze) {
+
+		double inf = Double.POSITIVE_INFINITY;
 
 		//Finchè la listaPuntiDaScandire non è vuota
 		while(!listaPuntiDaScandire.isEmpty()) {
@@ -162,28 +191,33 @@ public class Dijkstra {
 				break;
 			}
 		}	
+	}
+
+	public static void StampaCamminiMinimi(List<Punto> listaPunti, List<Double> pesiTotali, List<Punto> puntiPrecedenti, Punto sorgente) {
+
+		double inf = Double.POSITIVE_INFINITY;
 
 		listaPunti.stream().forEach(puntoDestinazione->{
 			if(pesiTotali.get(listaPunti.indexOf(puntoDestinazione))==inf) {
 				System.out.println("Il punto (" + puntoDestinazione.getX() + ", " + puntoDestinazione.getY() + ")"
 						+ " non è connesso alla sorgente!!");
-			} else if(puntoDestinazione.equals(sorgente)) {
-			
 			}else {
-
-				//Si calcola il cammino minimo rileggendo al contrario la lista puntiPrecedenti
-				Punto puntoIntermedio = puntiPrecedenti.get(listaPunti.indexOf(puntoDestinazione));		
-				System.out.println("Il cammino più breve dalla sorgente al punto: (" + puntoDestinazione.getX() + ", " +
-						puntoDestinazione.getY() + ") è lungo: " + pesiTotali.get(listaPunti.indexOf(puntoDestinazione)) +
-						" ed è:");
-				System.out.println("(" + puntoDestinazione.getX() + ", " + puntoDestinazione.getY() + ")");
-				System.out.println("(" + puntoIntermedio.getX() + ", " + puntoIntermedio.getY() + ")");
-
-				while(! puntoIntermedio.equals(sorgente)) {
-					puntoIntermedio = puntiPrecedenti.get(listaPunti.indexOf(puntoIntermedio));
+				if(!puntoDestinazione.equals(sorgente)) {
+					//Si calcola il cammino minimo rileggendo al contrario la lista puntiPrecedenti
+					Punto puntoIntermedio = puntiPrecedenti.get(listaPunti.indexOf(puntoDestinazione));		
+					System.out.println("Il cammino più breve dalla sorgente al punto: (" + puntoDestinazione.getX() + ", " +
+							puntoDestinazione.getY() + ") è lungo: " + pesiTotali.get(listaPunti.indexOf(puntoDestinazione)) +
+							" ed è:");
+					System.out.println("(" + puntoDestinazione.getX() + ", " + puntoDestinazione.getY() + ")");
 					System.out.println("(" + puntoIntermedio.getX() + ", " + puntoIntermedio.getY() + ")");
+
+					while(! puntoIntermedio.equals(sorgente)) {
+						puntoIntermedio = puntiPrecedenti.get(listaPunti.indexOf(puntoIntermedio));
+						System.out.println("(" + puntoIntermedio.getX() + ", " + puntoIntermedio.getY() + ")");
+					}
 				}
 			}
 		});
 	}
+
 }
