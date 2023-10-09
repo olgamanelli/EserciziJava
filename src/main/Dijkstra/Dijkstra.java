@@ -100,9 +100,29 @@ public class Dijkstra {
 		InizializzaListe(numeroPunti, indexSorgente, sorgente, pesiTotali, puntiPrecedenti,
 				listaPunti, listaPuntiConsiderati, mappaPuntiDistanze);
 
-		//Aggiornamento delle liste
-		AggiornaListe(pesiTotali, listaPuntiDaScandire, listaPuntiConsiderati,puntiPrecedenti,
-				listaPunti, mappaPuntiDistanze);
+
+		//Finchè la listaPuntiDaScandire non è vuota
+		while(!listaPuntiDaScandire.isEmpty()) {
+
+			//Se i restanti punti da Scandire sono tutti isolati, si esce dal while
+			if(listaPuntiDaScandire.stream().allMatch(punto ->
+			pesiTotali.get(listaPunti.indexOf(punto)).equals(inf))) {
+				break;
+			}
+
+			//Si scorrono tutti i punti in listaPuntiDaScandire e 
+			//si trova quello con peso minimo, chiamandolo puntoNuovo
+			Punto puntoNuovo = TrovaNuovoPunto(listaPuntiDaScandire, listaPunti, pesiTotali);
+
+			//Si aggiornano le liste
+
+			try {
+				AggiornaListe(listaPuntiDaScandire, listaPuntiConsiderati, listaPunti,
+						puntiPrecedenti, pesiTotali, puntoNuovo, mappaPuntiDistanze);
+			}catch(NullPointerException e){
+				break; //si genera eccezione se il punto è isolato
+			}
+		}	
 
 		//Stampa dei cammini minimi dalla sorgente a ogni altro punto
 		StampaCamminiMinimi(listaPunti, pesiTotali, puntiPrecedenti, sorgente);
@@ -110,9 +130,9 @@ public class Dijkstra {
 
 	}
 
-	public static void InizializzaListe(int numeroPunti, int indexSorgente, Punto sorgente, List<Double> pesiTotali, List<Punto> puntiPrecedenti,
-			List<Punto> listaPunti, List<Punto> listaPuntiConsiderati, Map<Punto, Map<Punto,Double>> mappaPuntiDistanze) {
-		//Si inizializza ad infinito per tutti i punti, tranne 0 per la sorgente
+	public static void InizializzaListe(int numeroPunti, int indexSorgente, Punto sorgente, List<Double> pesiTotali, 
+			List<Punto> puntiPrecedenti, List<Punto> listaPunti, List<Punto> listaPuntiConsiderati, 
+			Map<Punto, Map<Punto,Double>> mappaPuntiDistanze) {
 
 		double inf = Double.POSITIVE_INFINITY;
 
@@ -137,63 +157,51 @@ public class Dijkstra {
 		}); 
 	}
 
-	public static void AggiornaListe(List<Double> pesiTotali, List<Punto> listaPuntiDaScandire, 
-			List<Punto> listaPuntiConsiderati, List<Punto> puntiPrecedenti, List<Punto> listaPunti,
-			Map<Punto,Map<Punto, Double>> mappaPuntiDistanze) {
+	public static Punto TrovaNuovoPunto(List<Punto> listaPuntiDaScandire, List<Punto> listaPunti, List<Double> pesiTotali) {
 
-		double inf = Double.POSITIVE_INFINITY;
+		double min = Double.POSITIVE_INFINITY;
+		Punto puntoNuovo = null;
 
-		//Finchè la listaPuntiDaScandire non è vuota
-		while(!listaPuntiDaScandire.isEmpty()) {
-
-			//Se i restanti punti da Scandire sono tutti isolati, si esce dal while
-			if(listaPuntiDaScandire.stream().allMatch(punto ->
-			pesiTotali.get(listaPunti.indexOf(punto)).equals(inf))) {
-				break;
+		for(Punto punto:listaPuntiDaScandire) {
+			if(pesiTotali.get(listaPunti.indexOf(punto)) < min) {
+				puntoNuovo = punto;
+				min = pesiTotali.get(listaPunti.indexOf(punto));
 			}
+		}
 
-			//Si scorrono tutti i punti in listaPuntiDaScandire e 
-			//si trova quello con peso minimo, chiamandolo puntoNuovo
-			double min = inf;
-			Punto puntoNuovo = null;
-
-			for(Punto punto:listaPuntiDaScandire) {
-				if(pesiTotali.get(listaPunti.indexOf(punto)) < min) {
-					puntoNuovo = punto;
-					min = pesiTotali.get(listaPunti.indexOf(punto));
-				}
-			}
-
-			//Si aggiorna listaPuntiDaScandire togliendo puntoNuovo e lo si mette in listaPuntiConsiderati
-			listaPuntiDaScandire.remove(puntoNuovo);
-			listaPuntiConsiderati.add(puntoNuovo);
-
-			try {//Si genera eccezione se il nuovo punto considerato è isolato
-
-				//Si calcola la lista dei punti adiacent al punto nuovo
-				List<Punto> listaPuntiAdiacentiAlPuntoNuovo = new ArrayList<Punto>
-				(mappaPuntiDistanze.get(puntoNuovo).keySet());
-
-				//Per ogni punto in listaPuntiAdiacentiAPuntoNuovo
-				//e tale che pesiTotali[punto] > pesiTotali[puntoNuovo] + dist(punto,puntoNuovo)
-				for(Punto punto:listaPuntiAdiacentiAlPuntoNuovo) {
-					if(  listaPuntiDaScandire.contains(punto) && pesiTotali.get(listaPunti.indexOf(punto)) > 
-					pesiTotali.get(listaPunti.indexOf(puntoNuovo)) + punto.distanza(puntoNuovo)) {
-
-						//Si pone pesiTotali[punto] = pesiTotali[puntoNuovo] + dist(punto,puntoNuovo)
-						//e puntoPrecedente[punto]=puntoNuovo;
-						pesiTotali.set(listaPunti.indexOf(punto), pesiTotali.get(listaPunti.indexOf(puntoNuovo)) +
-								punto.distanza(puntoNuovo));
-						puntiPrecedenti.set(listaPunti.indexOf(punto), puntoNuovo);
-					}
-				}
-			}catch(NullPointerException e){
-				break;
-			}
-		}	
+		return puntoNuovo;
 	}
 
-	public static void StampaCamminiMinimi(List<Punto> listaPunti, List<Double> pesiTotali, List<Punto> puntiPrecedenti, Punto sorgente) {
+	public static void AggiornaListe(List<Punto> listaPuntiDaScandire, List<Punto> listaPuntiConsiderati, 
+			List<Punto> listaPunti, List<Punto> puntiPrecedenti, List<Double> pesiTotali, Punto puntoNuovo, 
+			Map<Punto, Map<Punto,Double>> mappaPuntiDistanze){
+
+		//Si aggiorna listaPuntiDaScandire togliendo puntoNuovo e lo si mette in listaPuntiConsiderati
+		listaPuntiDaScandire.remove(puntoNuovo);
+		listaPuntiConsiderati.add(puntoNuovo);
+
+
+		//Si calcola la lista dei punti adiacenti al punto nuovo
+		List<Punto> listaPuntiAdiacentiAlPuntoNuovo = new ArrayList<Punto>
+		(mappaPuntiDistanze.get(puntoNuovo).keySet());
+
+		//Per ogni punto in listaPuntiAdiacentiAPuntoNuovo
+		//e tale che pesiTotali[punto] > pesiTotali[puntoNuovo] + dist(punto,puntoNuovo)
+		for(Punto punto:listaPuntiAdiacentiAlPuntoNuovo) {
+			if(  listaPuntiDaScandire.contains(punto) && pesiTotali.get(listaPunti.indexOf(punto)) > 
+			pesiTotali.get(listaPunti.indexOf(puntoNuovo)) + punto.distanza(puntoNuovo)) {
+
+				//Si pone pesiTotali[punto] = pesiTotali[puntoNuovo] + dist(punto,puntoNuovo)
+				//e puntoPrecedente[punto]=puntoNuovo;
+				pesiTotali.set(listaPunti.indexOf(punto), pesiTotali.get(listaPunti.indexOf(puntoNuovo)) +
+						punto.distanza(puntoNuovo));
+				puntiPrecedenti.set(listaPunti.indexOf(punto), puntoNuovo);
+			}
+		}
+	}
+
+	public static void StampaCamminiMinimi(List<Punto> listaPunti, List<Double> pesiTotali, 
+			List<Punto> puntiPrecedenti, Punto sorgente) {
 
 		double inf = Double.POSITIVE_INFINITY;
 

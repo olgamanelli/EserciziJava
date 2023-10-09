@@ -31,9 +31,10 @@ public class Punto {
 
 	//distanza
 	public double distanza(Punto p) {
-		return Math.sqrt((this.x - p.getX())*(this.x - p.getX()) + (this.y - p.getY())*(this.y - p.getY()));
+		return Math.sqrt(Math.pow(this.x - p.getX(),2) + Math.pow(this.y - p.getY(),2));
 	}
 
+	//equals
 	@Override
 	public boolean equals(Object p) {
 		if(! (p instanceof Punto)) {
